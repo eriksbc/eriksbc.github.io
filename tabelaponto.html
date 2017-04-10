@@ -1,0 +1,209 @@
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+body
+{
+ background-color: #EEE;
+ color: #000;
+ font-family: Arial, sans-serif;
+}
+textarea
+{
+ height: 300px;
+ width: 600px;
+}
+.principal
+{
+ margin-left: 5%;
+}
+.centralizado
+{
+ margin-left: auto;
+ margin-right: auto;
+}
+.estilo1
+{
+    border: 1px solid black;
+    background-color: #EEE;
+    padding: 10px;
+}
+
+</style>
+</head>
+<body onload="atualizarexemplo();">
+<div style="display: none;">
+<table style="width: 50%; border-style: solid; background-color:gray;">
+    <tr><th class="estilo1">Método (somente Chrome)</th><th class="estilo1">Método 2 (qualquer browser)</th></tr>
+    <tr><td class="estilo1">Método 1</td><td class="estilo1">Método 2</td></tr>
+</table>
+<br><br></div>
+<div class="principal">
+<textarea id="codigoponto"></textarea>
+<br><br>
+<label for="fonte">Fonte:</label>
+<select id="fonte" onchange="atualizarfonte();">
+<option value="Arial" style="font-family: Arial;" selected="selected">Arial</option>
+<option value="Verdana" style="font-family: Verdana;">Verdana</option>
+<option value="Georgia" style="font-family: Georgia;">Georgia</option>
+<option value="Times New Roman" style="font-family: Times New Roman;">Times New Roman</option>
+<option value="Courier New" style="font-family: Courier New;">Courier New</option>
+<option value="Lucida Console" style="font-family: Lucida Console;">Lucida Console</option>
+</select>
+<br><br>
+<!-- Tamanho:
+<select id="tamanho" onchange="atualizarexemplo();">
+<option value="80%">80%</option>
+<option value="90%">90%</option>
+<option value="100%" selected="selected">100%</option>
+<option value="110%">110%</option>
+<option value="120%">120%</option>
+</select> -->
+<label for="tamanho">Tamanho:</label>
+<input id="tamanho" type="range" min="70" max="130" step="1" value="100" onchange="atualizarexemplo()"><span id="tamanho_" style="margin-left: 10px; font-weight: bold;"></span>
+<br><br>
+<label for="borda">Borda:</label>
+<select id="borda" onchange="atualizarexemplo();">
+<option value="solid" style="border-style: solid;" selected="selected">Contínua</option>
+<option value="dotted" style="border-style: dotted;">Pontilhada</option>
+<option value="dashed" style="border-style: dashed;">Tracejada</option>
+<option value="none" style="border-style: none;">Nenhuma</option>
+</select>
+<br><br>
+<input type="button" value="Gerar tabela" style="font-size: 16px; font-weight: bold;" onclick="gerar();" title="A tabela aparecerá em uma nova janela para impressão.">
+<br><br>
+<table id="exemplo">
+<tr>
+<th class="exemplo">Exemplo 1</th><th class="exemplo">Exemplo 2</th><th class="exemplo">Exemplo 3</th>
+</tr>
+<tr>
+<td class="exemplo">Exemplo 4</td><td class="exemplo">Exemplo 5</td><td class="exemplo">Exemplo 6</td>
+</tr>
+<tr>
+<td class="exemplo">Exemplo 7</td><td class="exemplo">Exemplo 8</td><td class="exemplo">Exemplo 9</td>
+</tr>
+</table>
+</div>
+</body>
+<script>
+//var inicio = "<html><head><link rel=\"stylesheet\" href=\"tabelaponto.css\"></head><body>";
+var fim = "</body></html>";
+var tabela = "";
+var r = "<i class=\"material-icons\">replay</i>";
+var c = "<i class=\"material-icons pull-right\">comment</i>";
+var w = "<i class=\"material-icons\">warning</i>";
+var fonte = document.getElementById("fonte");
+var tamanho = document.getElementById("tamanho");
+var tamanho_ = document.getElementById("tamanho_");
+var borda = document.getElementById("borda");
+var exe_tabela = document.getElementById("exemplo");
+var exe_celulas = document.getElementsByClassName("exemplo");
+
+function gerar()
+{
+ var codigo = document.getElementById("codigoponto").value;
+ var t1 = codigo.indexOf("<table");
+ if (t1 < 0)
+ {
+  gerar_texto();
+  return;
+ }
+ var t2 = codigo.indexOf("</table>");
+ if (t2 < 0)
+ {
+  return;
+ }
+ tabela = codigo.substring(t1, t2 + 8);
+ tabela = tabela.replace(new RegExp(r, "g"),"");
+ tabela = tabela.replace(new RegExp(c, "g"),"");
+ tabela = tabela.replace(new RegExp(w, "g"),"<i>alterado</i>");
+ finalizar();
+}
+
+function atualizarfonte()
+{
+ fonte.style.fontFamily = fonte.options[fonte.selectedIndex].value;
+ atualizarexemplo();
+}
+
+function atualizarexemplo()
+{
+ exe_tabela.style.fontFamily = fonte.options[fonte.selectedIndex].value;
+ //exe_tabela.style.fontSize = tamanho.options[tamanho.selectedIndex].value;
+ exe_tabela.style.fontSize = tamanho.value + "%";
+ exe_tabela.style.border = "1px " + borda.options[borda.selectedIndex].value + " black";
+ for (var i = 0, max = exe_celulas.length; i < max; i++)
+ {
+  exe_celulas[i].style.border = "1px " + borda.options[borda.selectedIndex].value + " black";
+ }
+ tamanho_.innerHTML = tamanho.value + "%";
+}
+
+function gerar_texto()
+{
+ var textoponto = document.getElementById("codigoponto");
+ var linhas = textoponto.value.split("\n");
+ if (linhas.length < 2)
+ {
+  return;
+ }
+ var hdr = linhas[0].split("\t");
+ if (hdr.length < 2)
+ {
+  return;
+ }
+ var numcolunas = hdr.length;
+ var obsindex = numcolunas - 1;
+ tabela = "<table class=\"table\">\n<thead>\n<tr>";
+ for (var i = 0; i <= obsindex; i++)
+ {
+  tabela += "<th>" + hdr[i] + "</th>";
+ }
+ tabela += "</tr>\n</thead>\n<tbody>";
+ var textocelulas = textoponto.value.substr(textoponto.value.indexOf("\n") + 1);
+ textocelulas = textocelulas.replace(new RegExp("Entrada replay", "g"), "Entrada");
+ textocelulas = textocelulas.replace(new RegExp("Saída replay", "g"), "Saída");
+ textocelulas = textocelulas.replace(new RegExp("warning replay", "g"), "<i>alterado</i>");
+ textocelulas = textocelulas.replace(new RegExp("\tcomment", "g"), "\t\t");
+ textocelulas = textocelulas.replace(new RegExp(" comment\n", "g"), "\t\n");
+ textocelulas = textocelulas.replace(new RegExp("\n", "g"), "");
+ var celulas = textocelulas.split("\t");
+ var x = 0;
+ var resto = celulas.length % numcolunas;
+ if (resto != 0)
+ {
+  for (var i = 0; i < numcolunas - resto; i++)
+  {
+   celulas.push("");
+  }
+ }
+ while (x < celulas.length)
+ {
+  if (celulas[x] == "")
+  {
+   break;
+  }
+  tabela += "<tr>";
+  for (var y = 0; y < numcolunas; y++)
+  {
+   tabela += "<td>" + celulas[x+y] + "</td>";
+  }
+  x += numcolunas;
+  tabela += "</tr>\n";
+ }
+ tabela += "</tbody>\n</table>";
+ finalizar();
+}
+
+function finalizar()
+{
+ var inicio = "<html><head><meta charset=\"utf-8\"><style>.table{font-family:" +
+  fonte.options[fonte.selectedIndex].value +
+  ";font-size:" + tamanho.value + "%" +
+  ";}table,td,th{border: 1px " + borda.options[borda.selectedIndex].value + " black;}</style><title>Tabela gerada</title></head><body>";
+ var novajanela = window.open("","_blank");
+ novajanela.document.write(inicio + tabela + fim);
+ novajanela.print();
+}
+</script>
+</html>
